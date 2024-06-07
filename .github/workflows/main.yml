@@ -15,7 +15,7 @@ jobs:
 
       - name: Copy files to Droplet
         run: |
-          droplet_ip="${{ secrets.DROPLET_IP }}"
+          droplet_ip="${{secrets.DROPLET_IP}}"
           ssh_command="ssh -i ~/.ssh/id_rsa root@$droplet_ip"
           $ssh_command 'mkdir -p /path/to/destination'
           scp -i ~/.ssh/id_rsa ./docker-compose.yml root@$droplet_ip:/path/to/destination/docker-compose.yml
