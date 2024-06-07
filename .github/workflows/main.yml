@@ -14,14 +14,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Copy files to Droplet
-        run: scp -r -i ${{ secrets.SSH_PRIVATE_KEY }} ./docker-compose.yml ${{ secrets.SSH_USERNAME }}@${{ secrets.DROPLET_IP }}:/path/to/destination
-
-      - name: SSH into Droplet and deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DROPLET_IP }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /path/to/destination
-            docker-compose up -d
+        run: |
+          droplet_ip="${{ secrets.DROPLET_IP }}"
+          ssh_command="ssh -i ~/.ssh/id_rsa root@$droplet_ip"
+          $ssh_command 'mkdir -p /path/to/destination'
+          scp -i ~/.ssh/id_rsa ./docker-compose.yml root@$droplet_ip:/path/to/destination/docker-compose.yml
