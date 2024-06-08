@@ -29,5 +29,5 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
             cd /avalanche
-            docker-compose up -d
+            docker-compose up --build -d
           EOF
