@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - DB_PASSWORD=secret
+    env_file:
+      - .env
     ports:
       - "8080:8080"
