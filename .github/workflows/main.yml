@@ -20,7 +20,7 @@ jobs:
 
       - name: Clone repository on Droplet
         run: |
-          ssh -o StrictHostKeyChecking=no username@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
             if [ -d "/path/to/destination/.git" ]; then
               cd /path/to/destination && git pull
             else
