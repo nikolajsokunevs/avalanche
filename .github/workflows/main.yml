@@ -20,7 +20,7 @@ jobs:
       - name: Clone repository on Droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
-            if [ -d "/path/to/destination/.git" ]; then
+            if [ -d "/avalanche/.git" ]; then
               cd /avalanche && git pull
             else
               git clone https://github.com/nikolajsokunevs/avalanche.git /avalanche
