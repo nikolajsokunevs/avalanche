@@ -31,7 +31,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
             cd /avalanche
-            export DB_PASSWORD=DB_PASSWORD
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             echo "DB_PASSWORD is: DB_PASSWORD"
             docker-compose down
             docker-compose build --no-cache
