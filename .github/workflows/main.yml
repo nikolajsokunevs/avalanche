@@ -12,9 +12,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Copy files to Droplet
+      - name: Clone repository on Droplet
         run: |
-          droplet_ip="${{ secrets.DROPLET_IP }}"
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} root@$droplet_ip 'mkdir -p /path/to/destination'
-          scp -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ./docker-compose.yml root@$droplet_ip:/path/to/destination/docker-compose.yml
+          ssh -o StrictHostKeyChecking=no username@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
+            if [ -d "/path/to/destination/.git" ]; then
+              cd /path/to/destination && git pull
+            else
+              git clone https://github.com/your_username/your_repository.git /path/to/destination
+            fi
+          EOF
