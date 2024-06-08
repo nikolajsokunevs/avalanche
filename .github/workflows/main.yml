@@ -22,8 +22,13 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
             if [ -d "/path/to/destination/.git" ]; then
-              cd /path/to/destination && git pull
+              cd /avalanche && git pull
             else
-              git clone https://github.com/nikolajsokunevs/avalanche.git /path/to/destination
+              git clone https://github.com/nikolajsokunevs/avalanche.git /avalanche
             fi
+      - name: Run docker-compose up
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
+            cd /avalanche
+            docker-compose up -d
           EOF
