@@ -26,6 +26,8 @@ jobs:
               git clone https://github.com/nikolajsokunevs/avalanche.git /avalanche
             fi
       - name: Run docker-compose up
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }} 
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
             cd /avalanche
