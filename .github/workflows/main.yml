@@ -24,6 +24,6 @@ jobs:
             if [ -d "/path/to/destination/.git" ]; then
               cd /path/to/destination && git pull
             else
-              git clone https://github.com/your_username/your_repository.git /path/to/destination
+              git clone https://github.com/nikolajsokunevs/avalanche.git /path/to/destination
             fi
           EOF
