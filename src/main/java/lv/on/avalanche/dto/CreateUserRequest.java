@@ -2,7 +2,6 @@ package lv.on.avalanche.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
 import java.sql.Timestamp;
 
 @Data
@@ -15,4 +14,8 @@ public class CreateUserRequest {
     private Long chatId;
     private String state;
     private Timestamp registeredAt;
+
+    public String toString(){
+        return "Name: "+name+", username: "+userName+", chatId: "+chatId;
+    }
 }
