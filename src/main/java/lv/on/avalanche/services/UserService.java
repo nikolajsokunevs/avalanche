@@ -26,23 +26,26 @@ public class UserService {
     }
 
     public User createUser(CreateUserRequest request) {
-        try {
-            User user = new User();
-            user.setName(request.getName());
-            user.setChatId(request.getChatId());
-            user.setUserName(request.getUserName());
-            user.setRegisteredAt(Timestamp.valueOf(LocalDateTime.now()));
-            user = userRepository.save(user);
-            log.info("User saved");
-            log.info("Create user: "+request);
-            Balance balance = new Balance();
-            balance.setUser(user);
-            balance.setBalance(1000.00);
-            balanceRepository.save(balance);
-            return user;
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (userRepository.findByChatId(request.getChatId())==null) {
+            try {
+                User user = new User();
+                user.setName(request.getName());
+                user.setChatId(request.getChatId());
+                user.setUserName(request.getUserName());
+                user.setRegisteredAt(Timestamp.valueOf(LocalDateTime.now()));
+                user = userRepository.save(user);
+                log.info("User saved");
+                log.info("Create user: " + request);
+                Balance balance = new Balance();
+                balance.setUser(user);
+                balance.setBalance(1000.00);
+                balanceRepository.save(balance);
+                return user;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }
+
 }
