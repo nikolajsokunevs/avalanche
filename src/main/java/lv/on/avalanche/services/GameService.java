@@ -4,6 +4,7 @@ import lv.on.avalanche.dto.game.create.CreateGameRequest;
 import lv.on.avalanche.dto.game.create.CreateGameResponse;
 import lv.on.avalanche.dto.game.move.MoveRequest;
 import lv.on.avalanche.dto.game.move.MoveResponse;
+import lv.on.avalanche.dto.game.waitforgame.WaitForGameRequest;
 import lv.on.avalanche.entities.Balance;
 import lv.on.avalanche.entities.Game;
 import lv.on.avalanche.exceptions.GameException;
@@ -14,24 +15,56 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 @Service
 public class GameService {
 
+    private  static Map<Double, Queue<Long>> QUEUE=new HashMap<>();
+
+    private  static Map<Long, Game> GAMES=new HashMap<>();
     @Autowired
     private GameRepository gameRepository;
     @Autowired
     private BalanceRepository balanceRepository;
 
+    public synchronized Game waitForGame(WaitForGameRequest request){
+        Long chatId=request.user1();
+        Double threshold= request.threshold();
+        if (GAMES.containsKey(chatId)){
+            return GAMES.get(chatId);
+        }
+        if (QUEUE.containsKey(threshold)){
+            if (QUEUE.get(threshold).size()>0){
+                return createGame(chatId, QUEUE.get(threshold).poll(), threshold);
+            }else {
+                QUEUE.get(threshold).add(chatId);
+            }
+        }else{
+            QUEUE.put(threshold, new LinkedList<>(){{add(chatId);}});
+        }
+        throw new GameException(200, "Wait for second player");
+    }
+
     public CreateGameResponse createGame(CreateGameRequest request) {
+        Game game=createGame(request.user1(), request.user2(), request.threshold());
+        return new CreateGameResponse(game.getId(), game.getNextMoveUser());
+    }
+
+    public Game createGame(Long user1, Long user2, Double threshold){
         Game game = new Game();
-        game.setUser1(request.user1());
-        game.setUser2(request.user2());
-        game.setNextMoveUser(request.user1());
-        game.setThreshold(request.threshold());
+        game.setUser1(user1);
+        game.setUser2(user2);
+        game.setNextMoveUser(user1);
+        game.setThreshold(threshold);
         game.setRegisteredAt(Timestamp.valueOf(LocalDateTime.now()));
         game = gameRepository.save(game);
-        return new CreateGameResponse(game.getId(), game.getNextMoveUser());
+        GAMES.put(user1, game);
+        GAMES.put(user2, game);
+        return game;
     }
 
     public MoveResponse move(MoveRequest request) {
