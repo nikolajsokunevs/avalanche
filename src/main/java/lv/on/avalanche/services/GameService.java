@@ -1,5 +1,7 @@
 package lv.on.avalanche.services;
 
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import lv.on.avalanche.dto.game.create.CreateGameRequest;
 import lv.on.avalanche.dto.game.create.CreateGameResponse;
 import lv.on.avalanche.dto.game.move.MoveRequest;
@@ -20,6 +22,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+@Slf4j
 @Service
 public class GameService {
 
@@ -34,10 +37,12 @@ public class GameService {
         Long chatId = request.user1();
         Double threshold = request.threshold();
         if (GAMES.containsKey(chatId)) {
+            log.info("Game in progress: "+GAMES.get(chatId));
             return GAMES.get(chatId);
         }
         if (QUEUE.containsKey(threshold)) {
             if (QUEUE.get(threshold).size() > 0) {
+                log.info("Game started!");
                 return createGame(chatId, QUEUE.get(threshold).poll(), threshold);
             } else {
                 QUEUE.get(threshold).add(chatId);
