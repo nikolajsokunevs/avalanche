@@ -23,38 +23,39 @@ import java.util.Queue;
 @Service
 public class GameService {
 
-    private  static Map<Double, Queue<Long>> QUEUE=new HashMap<>();
-
-    private  static Map<Long, Game> GAMES=new HashMap<>();
+    private static Map<Double, Queue<Long>> QUEUE = new HashMap<>();
+    private static Map<Long, Game> GAMES = new HashMap<>();
     @Autowired
     private GameRepository gameRepository;
     @Autowired
     private BalanceRepository balanceRepository;
 
-    public synchronized Game waitForGame(WaitForGameRequest request){
-        Long chatId=request.user1();
-        Double threshold= request.threshold();
-        if (GAMES.containsKey(chatId)){
+    public synchronized Game waitForGame(WaitForGameRequest request) {
+        Long chatId = request.user1();
+        Double threshold = request.threshold();
+        if (GAMES.containsKey(chatId)) {
             return GAMES.get(chatId);
         }
-        if (QUEUE.containsKey(threshold)){
-            if (QUEUE.get(threshold).size()>0){
+        if (QUEUE.containsKey(threshold)) {
+            if (QUEUE.get(threshold).size() > 0) {
                 return createGame(chatId, QUEUE.get(threshold).poll(), threshold);
-            }else {
+            } else {
                 QUEUE.get(threshold).add(chatId);
             }
-        }else{
-            QUEUE.put(threshold, new LinkedList<>(){{add(chatId);}});
+        } else {
+            QUEUE.put(threshold, new LinkedList<>() {{
+                add(chatId);
+            }});
         }
         throw new GameException(200, "Wait for second player");
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) {
-        Game game=createGame(request.user1(), request.user2(), request.threshold());
+        Game game = createGame(request.user1(), request.user2(), request.threshold());
         return new CreateGameResponse(game.getId(), game.getNextMoveUser());
     }
 
-    public Game createGame(Long user1, Long user2, Double threshold){
+    public Game createGame(Long user1, Long user2, Double threshold) {
         Game game = new Game();
         game.setUser1(user1);
         game.setUser2(user2);
@@ -69,7 +70,7 @@ public class GameService {
 
     public MoveResponse move(MoveRequest request) {
         Balance balance = balanceRepository.findByUserChatId(request.userId());
-        if(balance==null){
+        if (balance == null) {
             throw new GameException(500, "There's no balance");
         }
         if (balance.getBalance() < request.bid()) {
@@ -85,18 +86,18 @@ public class GameService {
         if (!game.getNextMoveUser().equals(request.userId())) {
             throw new GameException(500, "Wait for your move");
         }
-        if (game.getThreshold()*0.15< request.bid()){
-            throw new GameException(500, "The bid should be between 0.01 and "+game.getThreshold()*0.15);
+        if (game.getThreshold() * 0.15 < request.bid()) {
+            throw new GameException(500, "The bid should be between 0.01 and " + game.getThreshold() * 0.15);
         }
         game.setBank(game.getBank() + request.bid());
-        balance.setBalance(balance.getBalance()- request.bid());
+        balance.setBalance(balance.getBalance() - request.bid());
         if (game.getBank() > game.getThreshold()) {
             game.setInProgress(false);
             game.setWinner(request.userId());
         } else {
             game.setNextMoveUser(request.userId().equals(game.getUser1()) ? game.getUser2() : game.getUser1());
         }
-        game.setCounter(game.getCounter()+1);
+        game.setCounter(game.getCounter() + 1);
         gameRepository.save(game);
         balanceRepository.save(balance);
         return new MoveResponse(request.gameId(), game.getWinner() != null ? true : false, game.getCounter());
