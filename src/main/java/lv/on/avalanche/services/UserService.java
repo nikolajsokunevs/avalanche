@@ -26,7 +26,8 @@ public class UserService {
     }
 
     public User createUser(CreateUserRequest request) {
-        if (userRepository.findByChatId(request.getChatId())==null) {
+        User response=userRepository.findByChatId(request.getChatId());
+        if (response==null) {
             try {
                 User user = new User();
                 user.setName(request.getName());
@@ -45,7 +46,7 @@ public class UserService {
                 e.printStackTrace();
             }
         }
-        return null;
+        return response;
     }
 
 }
