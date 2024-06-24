@@ -35,6 +35,7 @@ public class GameService {
 
     public synchronized Game waitForGame(WaitForGameRequest request) {
         Long chatId = request.user1();
+        log.info("Wait for game!");
         Double threshold = request.threshold();
         if (GAMES.containsKey(chatId)) {
             log.info("Game in progress: "+GAMES.get(chatId));
