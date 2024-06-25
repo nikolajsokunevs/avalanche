@@ -35,7 +35,7 @@ public class GameController {
     }
 
     @PostMapping("/move")
-    public MoveResponse create(@RequestBody MoveRequest request) {
+    public MoveResponse doAMove(@RequestBody MoveRequest request) {
         return gameService.move(request);
     }
 }
