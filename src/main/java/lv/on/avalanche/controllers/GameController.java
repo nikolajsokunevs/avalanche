@@ -8,6 +8,7 @@ import lv.on.avalanche.dto.game.move.MoveRequest;
 import lv.on.avalanche.dto.game.move.MoveResponse;
 import lv.on.avalanche.dto.game.waitforgame.WaitForGameRequest;
 import lv.on.avalanche.dto.game.waitforgame.WaitForGameResponse;
+import lv.on.avalanche.entities.Game;
 import lv.on.avalanche.services.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,12 @@ public class GameController {
         log.info("Wait for game: "+request);
         WaitForGameResponse waitForGameResponse=new WaitForGameResponse(gameService.waitForGame(request));
         return waitForGameResponse;
+    }
+
+    @GetMapping("/wait-for-your-turn/{userId}")
+    public Game forForYourTurn(@PathVariable Long userId) throws Exception{
+        log.info("Wait for your turn: "+userId);
+        return gameService.waitForYourTurn(userId);
     }
 
     @PostMapping("/create")

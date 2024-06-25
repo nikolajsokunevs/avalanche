@@ -1,6 +1,5 @@
 package lv.on.avalanche.services;
 
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import lv.on.avalanche.dto.game.create.CreateGameRequest;
 import lv.on.avalanche.dto.game.create.CreateGameResponse;
@@ -54,6 +53,15 @@ public class GameService {
             }});
         }
         throw new GameException(200, "Wait for second player");
+    }
+
+    public Game waitForYourTurn(Long id) throws InterruptedException {
+        Game game=GAMES.get(id);
+        while (game.getNextMoveUser()!=id){
+            Thread.sleep(1000);
+        }
+        return game;
+
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) {
