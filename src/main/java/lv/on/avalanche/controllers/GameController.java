@@ -29,7 +29,7 @@ public class GameController {
     }
 
     @GetMapping("/game/{gameId}")
-    public Game forForYourTurn(@PathVariable Long gameId){
+    public Game getAGame(@PathVariable Long gameId){
         log.info("Get game: "+gameId);
         return gameService.getGame(gameId);
     }
