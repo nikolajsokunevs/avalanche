@@ -28,15 +28,10 @@ public class GameController {
         return waitForGameResponse;
     }
 
-    @GetMapping("/wait-for-your-turn/{userId}")
-    public Game forForYourTurn(@PathVariable Long userId) throws Exception{
-        log.info("Wait for your turn: "+userId);
-        return gameService.waitForYourTurn(userId);
-    }
-
-    @PostMapping("/create")
-    public CreateGameResponse create(@RequestBody CreateGameRequest request) {
-        return gameService.createGame(request);
+    @GetMapping("/game/{gameId}")
+    public Game forForYourTurn(@PathVariable Long gameId){
+        log.info("Get game: "+gameId);
+        return gameService.getGame(gameId);
     }
 
     @PostMapping("/move")

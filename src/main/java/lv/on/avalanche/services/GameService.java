@@ -37,7 +37,7 @@ public class GameService {
         log.info("Wait for game!");
         Double threshold = request.threshold();
         if (GAMES.containsKey(chatId)) {
-            log.info("Game in progress: "+GAMES.get(chatId));
+            log.info("Game in progress: " + GAMES.get(chatId));
             return GAMES.get(chatId);
         }
         if (QUEUE.containsKey(threshold)) {
@@ -55,18 +55,13 @@ public class GameService {
         throw new GameException(200, "Wait for second player");
     }
 
-    public Game waitForYourTurn(Long id) throws InterruptedException {
-        Game game=GAMES.get(id);
-        while (game.getNextMoveUser()!=id){
-            Thread.sleep(1000);
+    public Game getGame(Long gameId){
+        for (Map.Entry<Long, Game> entry : GAMES.entrySet()) {
+            if (entry.getValue().getId() == gameId) {
+                return entry.getValue();
+            }
         }
-        return game;
-
-    }
-
-    public CreateGameResponse createGame(CreateGameRequest request) {
-        Game game = createGame(request.user1(), request.user2(), request.threshold());
-        return new CreateGameResponse(game.getId(), game.getNextMoveUser());
+        return null;
     }
 
     public Game createGame(Long user1, Long user2, Double threshold) {
@@ -93,7 +88,7 @@ public class GameService {
         if (!gameRepository.findById(request.gameId()).isPresent()) {
             throw new GameException(500, "Game not found");
         }
-        Game game = gameRepository.findById(request.gameId()).get();
+        Game game = getGame(request.gameId());
         if (!game.getInProgress()) {
             throw new GameException(500, "Game was finished");
         }
