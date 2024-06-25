@@ -2,21 +2,19 @@ package lv.on.avalanche.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "games")
-public class Game {
+public class GameEntity {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
     @Column(nullable = false)
-    private Long user1;
-    @Column(nullable = false)
-    private Long user2;
+    private Long user1Id;
+    private Long user2Id;
     @Column(nullable = false)
     private Long nextMoveUser;
     @Column(nullable = false, columnDefinition = "boolean default true")
@@ -27,6 +25,17 @@ public class Game {
     private Double threshold;
     @Column(nullable = false, columnDefinition = "double default 0")
     private Double bank = 0.0;
-    private Integer counter = 0;
-    private Timestamp registeredAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

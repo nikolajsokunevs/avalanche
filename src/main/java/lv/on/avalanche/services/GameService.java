@@ -1,115 +1,110 @@
 package lv.on.avalanche.services;
 
 import lombok.extern.slf4j.Slf4j;
-import lv.on.avalanche.dto.game.create.CreateGameRequest;
-import lv.on.avalanche.dto.game.create.CreateGameResponse;
-import lv.on.avalanche.dto.game.move.MoveRequest;
-import lv.on.avalanche.dto.game.move.MoveResponse;
-import lv.on.avalanche.dto.game.waitforgame.WaitForGameRequest;
-import lv.on.avalanche.entities.Balance;
-import lv.on.avalanche.entities.Game;
+import lv.on.avalanche.dto.BetDTO;
+import lv.on.avalanche.dto.GameDTO;
+import lv.on.avalanche.entities.BalanceEntity;
+import lv.on.avalanche.entities.BetEntity;
+import lv.on.avalanche.entities.GameEntity;
 import lv.on.avalanche.exceptions.GameException;
+import lv.on.avalanche.mapper.BetMapper;
+import lv.on.avalanche.mapper.GameMapper;
 import lv.on.avalanche.repository.BalanceRepository;
+import lv.on.avalanche.repository.BetRepository;
 import lv.on.avalanche.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class GameService {
 
-    private static Map<Double, Queue<Long>> QUEUE = new HashMap<>();
-    private static Map<Long, Game> GAMES = new HashMap<>();
+    private static List<GameDTO> PENDING_GAMES = new ArrayList<>();
+    private static List<GameDTO> ACTIVE_GAMES = new ArrayList<>();
     @Autowired
     private GameRepository gameRepository;
     @Autowired
+    protected GameMapper gameMapper;
+    @Autowired
+    protected BetMapper betMapper;
+    @Autowired
     private BalanceRepository balanceRepository;
+    @Autowired
+    private BetRepository betRepository;
 
-    public synchronized Game waitForGame(WaitForGameRequest request) {
-        Long chatId = request.user1();
-        log.info("Wait for game!");
-        Double threshold = request.threshold();
-        if (GAMES.containsKey(chatId)) {
-            log.info("Game in progress: " + GAMES.get(chatId));
-            return GAMES.get(chatId);
+    public synchronized GameDTO startNewGame(GameDTO request) {
+        log.info("Start new game!");
+        Long userId = request.getUser1Id();
+        Double threshold = request.getThreshold();
+        Optional<GameDTO> gameDTOOptional= PENDING_GAMES.stream().filter(e->e.getThreshold().equals(request.getThreshold())).findFirst();
+        if (gameDTOOptional.isPresent()){
+            gameDTOOptional.get().setUser2Id(request.getUser1Id());
+            gameRepository.save(gameMapper.toEntity(gameDTOOptional.get()));
+            PENDING_GAMES.remove(gameDTOOptional.get());
+            ACTIVE_GAMES.add(gameDTOOptional.get());
+            return gameDTOOptional.get();
         }
-        if (QUEUE.containsKey(threshold)) {
-            if (QUEUE.get(threshold).size() > 0) {
-                log.info("Game started!");
-                return createGame(chatId, QUEUE.get(threshold).poll(), threshold);
-            } else {
-                QUEUE.get(threshold).add(chatId);
-            }
-        } else {
-            QUEUE.put(threshold, new LinkedList<>() {{
-                add(chatId);
-            }});
-        }
-        throw new GameException(200, "Wait for second player");
+        GameDTO gameDTO=createGame(userId, threshold);
+
+        PENDING_GAMES.add(gameDTO);
+        return gameDTO;
     }
 
-    public Game getGame(Long gameId){
-        for (Map.Entry<Long, Game> entry : GAMES.entrySet()) {
-            if (entry.getValue().getId() == gameId) {
-                return entry.getValue();
-            }
-        }
-        return null;
+    public GameDTO getGame(Long gameId){
+        Optional<GameDTO> gameDTO=ACTIVE_GAMES.stream().filter(e->e.getId().equals(gameId)).findFirst();
+        if (gameDTO.isPresent()){
+            return gameDTO.get();
+        }return null;
     }
 
-    public Game createGame(Long user1, Long user2, Double threshold) {
-        Game game = new Game();
-        game.setUser1(user1);
-        game.setUser2(user2);
-        game.setNextMoveUser(user1);
-        game.setThreshold(threshold);
-        game.setRegisteredAt(Timestamp.valueOf(LocalDateTime.now()));
-        game = gameRepository.save(game);
-        GAMES.put(user1, game);
-        GAMES.put(user2, game);
-        return game;
+    private GameDTO createGame(Long user1, Double threshold) {
+        GameEntity gameEntity = new GameEntity();
+        gameEntity.setUser1Id(user1);
+        gameEntity.setNextMoveUser(user1);
+        gameEntity.setThreshold(threshold);
+        gameEntity = gameRepository.save(gameEntity);
+        return gameMapper.toDTO(gameEntity);
     }
 
-    public MoveResponse move(MoveRequest request) {
-        Balance balance = balanceRepository.findByUserChatId(request.userId());
-        if (balance == null) {
+    public List<BetDTO> placeBet(BetDTO request) {
+        log.info("Place a bet!");
+        BalanceEntity balanceEntity = balanceRepository.findByUserId(request.getUserId());
+        if (balanceEntity == null) {
             throw new GameException(500, "There's no balance");
         }
-        if (balance.getBalance() < request.bid()) {
+        if (balanceEntity.getBalance() < request.getAmount()) {
             throw new GameException(500, "There are insufficient funds in the account");
         }
-        if (!gameRepository.findById(request.gameId()).isPresent()) {
+        if (!gameRepository.findById(request.getGameId()).isPresent()) {
             throw new GameException(500, "Game not found");
         }
-        Game game = getGame(request.gameId());
+        GameDTO game = getGame(request.getGameId());
         if (!game.getInProgress()) {
             throw new GameException(500, "Game was finished");
         }
-        if (!game.getNextMoveUser().equals(request.userId())) {
+        if (!game.getNextMoveUser().equals(request.getUserId())) {
             throw new GameException(500, "Wait for your move");
         }
-        if (game.getThreshold() * 0.15 < request.bid()) {
+        if (game.getThreshold() * 0.15 < request.getAmount()) {
             throw new GameException(500, "The bid should be between 0.01 and " + game.getThreshold() * 0.15);
         }
-        game.setBank(game.getBank() + request.bid());
-        balance.setBalance(balance.getBalance() - request.bid());
+        game.setBank(game.getBank() + request.getAmount());
+        balanceEntity.setBalance(balanceEntity.getBalance() - request.getAmount());
         if (game.getBank() > game.getThreshold()) {
             game.setInProgress(false);
-            game.setWinner(request.userId());
+            game.setWinner(request.getUserId());
         } else {
-            game.setNextMoveUser(request.userId().equals(game.getUser1()) ? game.getUser2() : game.getUser1());
+            game.setNextMoveUser(request.getUserId().equals(game.getUser1Id()) ? game.getUser2Id() : game.getUser1Id());
         }
-        game.setCounter(game.getCounter() + 1);
-        gameRepository.save(game);
-        balanceRepository.save(balance);
-        return new MoveResponse(request.gameId(), game.getWinner() != null ? true : false, game.getCounter());
+        gameRepository.save(gameMapper.toEntity(game));
+        balanceRepository.save(balanceEntity);
+        betRepository.save(betMapper.toEntity(request));
+        List<BetEntity> betEntities = betRepository.findByGameIdAndUserId(request.getGameId(), request.getUserId());
+        return betEntities.stream()
+                .map(betMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }
 

@@ -3,12 +3,12 @@ package lv.on.avalanche.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "users")
-public class User {
+public class UserEntity {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -20,15 +20,18 @@ public class User {
     private Long chatId;
 
     private String state;
-    private Timestamp registeredAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "chatId=" + id +
-                ", name='" + name + '\'' +
-                ", state=" + state + '\'' +
-                ", registeredAt=" + registeredAt +
-                '}';
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
 }

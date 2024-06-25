@@ -6,13 +6,13 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "balance")
-public class Balance {
+public class BalanceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn
-    private User user;
+    private UserEntity userEntity;
     private Double balance;
 }

@@ -1,9 +1,9 @@
 package lv.on.avalanche.repository;
 
-import lv.on.avalanche.entities.User;
+import lv.on.avalanche.entities.UserEntity;
 import org.springframework.data.repository.CrudRepository;
 
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
-    User findByChatId(Long chatId);
+    UserEntity findByChatId(Long chatId);
 }
