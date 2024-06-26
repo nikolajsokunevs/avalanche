@@ -14,6 +14,7 @@ import lv.on.avalanche.repository.BetRepository;
 import lv.on.avalanche.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,25 +39,32 @@ public class GameService {
         log.info("Start new game!");
         Long userId = request.getUser1Id();
         Double threshold = request.getThreshold();
-        Optional<GameDTO> gameDTOOptional= PENDING_GAMES.stream().filter(e->e.getThreshold().equals(request.getThreshold())&&!e.getUser1Id().equals(request.getUser1Id())).findFirst();
-        if (gameDTOOptional.isPresent()){
+        Optional<GameDTO> gameDTOOptional = PENDING_GAMES.stream().filter(e -> e.getThreshold().equals(request.getThreshold())
+                //&& !e.getUser1Id().equals(request.getUser1Id())
+        ).findFirst();
+        if (gameDTOOptional.isPresent()) {
             gameDTOOptional.get().setUser2Id(request.getUser1Id());
             gameRepository.save(gameMapper.toEntity(gameDTOOptional.get()));
             PENDING_GAMES.remove(gameDTOOptional.get());
             ACTIVE_GAMES.add(gameDTOOptional.get());
             return gameDTOOptional.get();
         }
-        GameDTO gameDTO=createGame(userId, threshold);
+        GameDTO gameDTO = createGame(userId, threshold);
 
         PENDING_GAMES.add(gameDTO);
         return gameDTO;
     }
 
-    public GameDTO getGame(Long gameId){
-        Optional<GameDTO> gameDTO=ACTIVE_GAMES.stream().filter(e->e.getId().equals(gameId)).findFirst();
-        if (gameDTO.isPresent()){
+    public GameDTO getGame(Long gameId) {
+        Optional<GameDTO> gameDTO = ACTIVE_GAMES.stream().filter(e -> e.getId().equals(gameId)).findFirst();
+        if (gameDTO.isPresent()) {
             return gameDTO.get();
-        }return null;
+        }
+        gameDTO = PENDING_GAMES.stream().filter(e -> e.getId().equals(gameId)).findFirst();
+        if (gameDTO.isPresent()) {
+            return gameDTO.get();
+        }
+        return null;
     }
 
     private GameDTO createGame(Long user1, Double threshold) {
