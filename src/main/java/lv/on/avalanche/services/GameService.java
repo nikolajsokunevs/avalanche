@@ -96,9 +96,9 @@ public class GameService {
         if (!game.getNextMoveUser().equals(request.getUserId())) {
             throw new GameException(500, "Wait for your move");
         }
-        if (game.getThreshold() * 0.15 < request.getAmount()) {
-            throw new GameException(500, "The bid should be between 0.01 and " + game.getThreshold() * 0.15);
-        }
+//        if (game.getThreshold() * 0.15 < request.getAmount()) {
+//            throw new GameException(500, "The bid should be between 0.01 and " + game.getThreshold() * 0.15);
+//        }
         game.setBank(game.getBank() + request.getAmount());
         balanceEntity.setBalance(balanceEntity.getBalance() - request.getAmount());
         if (game.getBank() > game.getThreshold()) {
