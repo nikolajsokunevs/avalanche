@@ -79,6 +79,7 @@ public class GameService {
     public List<BetDTO> placeBet(BetDTO request) {
         log.info("Place a bet!");
         BalanceEntity balanceEntity = balanceRepository.findByUserId(request.getUserId());
+        log.info("Balance: "+balanceEntity.getBalance());
         if (balanceEntity == null) {
             throw new GameException(500, "There's no balance");
         }
