@@ -8,7 +8,7 @@ services:
     environment:
       - DB_PASSWORD
     ports:
-      - "443:8443"
+      - "8443:8443"
     volumes:
       - /etc/letsencrypt/live/gameavalanche.duckdns.org:/etc/letsencrypt/live/gameavalanche.duckdns.org
       - /etc/letsencrypt/archive/gameavalanche.duckdns.org:/etc/letsencrypt/archive/gameavalanche.duckdns.org
