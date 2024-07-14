@@ -29,4 +29,11 @@ public class BalanceService {
         balanceRepository.save(balance);
         return balanceMapper.toDTO(balance);
     }
+
+    public BalanceDTO withdrawal(Long userId){
+        BalanceEntity balance=balanceRepository.findByUserId(userId);
+        balance.setBalance(0.00);
+        balanceRepository.save(balance);
+        return balanceMapper.toDTO(balance);
+    }
 }

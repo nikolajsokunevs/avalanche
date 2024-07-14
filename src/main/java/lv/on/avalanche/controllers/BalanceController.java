@@ -23,4 +23,9 @@ public class BalanceController {
     public BalanceDTO addBalance(@PathVariable Long userId, @PathVariable String amount) {
         return balanceService.addBalance(userId, amount);
     }
+
+    @GetMapping("/withdrawal/{userId}")
+    public BalanceDTO withdrawal(@PathVariable Long userId) {
+        return balanceService.withdrawal(userId);
+    }
 }

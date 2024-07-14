@@ -40,7 +40,7 @@ public class GameService {
         Long userId = request.getUser1Id();
         Double threshold = request.getThreshold();
         Optional<GameDTO> gameDTOOptional = PENDING_GAMES.stream().filter(e -> e.getThreshold().equals(request.getThreshold())
-                //&& !e.getUser1Id().equals(request.getUser1Id())
+                && !e.getUser1Id().equals(request.getUser1Id())
         ).findFirst();
         if (gameDTOOptional.isPresent()) {
             gameDTOOptional.get().setUser2Id(request.getUser1Id());
