@@ -40,7 +40,7 @@ public class GameService {
         Long userId = request.getUser1Id();
         Double threshold = request.getThreshold();
         Optional<GameDTO> gameDTOOptional = PENDING_GAMES.stream().filter(e -> e.getThreshold().equals(request.getThreshold())
-                && !e.getUser1Id().equals(request.getUser1Id())
+                //&& !e.getUser1Id().equals(request.getUser1Id())
         ).findFirst();
         if (gameDTOOptional.isPresent()) {
             gameDTOOptional.get().setUser2Id(request.getUser1Id());
@@ -96,15 +96,15 @@ public class GameService {
         if (!game.getNextMoveUser().equals(request.getUserId())) {
             throw new GameException(500, "Wait for your move");
         }
-//        if (game.getThreshold() * 0.15 < request.getAmount()) {
-//            throw new GameException(500, "The bid should be between 0.01 and " + game.getThreshold() * 0.15);
-//        }
-
+        if (game.getThreshold() * 0.15 < request.getAmount()) {
+            throw new GameException(500, "The bid should be between 0.01 and " + game.getThreshold() * 0.15);
+        }
         game.setBank(game.getBank() + request.getAmount());
         balanceEntity.setBalance(balanceEntity.getBalance() - request.getAmount());
         if (game.getBank() > game.getThreshold()) {
             game.setInProgress(false);
             game.setWinner(request.getUserId());
+            balanceEntity.setBalance(balanceEntity.getBalance()+game.getBank());
         } else {
             game.setNextMoveUser(request.getUserId().equals(game.getUser1Id()) ? game.getUser2Id() : game.getUser1Id());
         }
