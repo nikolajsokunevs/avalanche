@@ -1,1 +1,1 @@
-Online gameEntity, BE
+Online game
