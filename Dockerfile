@@ -5,4 +5,4 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean install -DskipTests
 EXPOSE 8443
-CMD ["java", "-jar", "target/be-1.0-SNAPSHOT.jar"]
+CMD ["java", "-jar", "target/be-1.0-SNAPSHOT.jar", "--spring.profiles.active=do"]
