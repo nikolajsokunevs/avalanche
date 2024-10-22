@@ -28,10 +28,12 @@ jobs:
       - name: Run docker-compose up
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          TG_SECRET: ${{ secrets.TG_SECRET }}
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} 'bash -s' << 'EOF'
             cd /avalanche
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export TG_SECRET=${{ secrets.TG_SECRET }}
             docker-compose down
             docker-compose build --no-cache
             docker-compose up -d

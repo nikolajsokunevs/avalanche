@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - DB_PASSWORD
+      - TG_SECRET
       - SPRING_PROFILES_ACTIVE=do
     ports:
       - "8443:8443"
