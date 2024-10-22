@@ -21,8 +21,6 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("TG_SECRET");
-        System.out.println(telegramSecret);
         http.cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests((requests) -> requests
