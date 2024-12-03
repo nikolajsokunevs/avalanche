@@ -2,6 +2,7 @@ package lv.on.avalanche.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,17 +15,27 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     @Value("${telegram.secret}")
     private String telegramSecret;
 
+    private final HashVerificationFilter hashVerificationFilter;
+
+    public WebSecurityConfig(HashVerificationFilter hashVerificationFilter) {
+        this.hashVerificationFilter = hashVerificationFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors().and()
-                .csrf().disable()
-                .authorizeHttpRequests((requests) -> requests
-                        .anyRequest().permitAll());
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/get/**").authenticated()
+                        .anyRequest().permitAll()
+                )
+                .csrf(csrf -> csrf.disable());
+
         return http.build();
     }
 

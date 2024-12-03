@@ -5,6 +5,7 @@ import lv.on.avalanche.dto.UserDTO;
 import lv.on.avalanche.mapper.UserMapper;
 import lv.on.avalanche.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -17,12 +18,14 @@ public class UserController {
     private UserMapper userMapper;
 
     @PostMapping("/create")
+    @PreAuthorize("#request.id == authentication.principal.id")
     public UserDTO create(@RequestBody UserDTO request) {
         log.info("Create user: " + request);
         return userService.createUser(request);
     }
 
     @GetMapping("/get/{id}")
+    @PreAuthorize("#id == authentication.principal.id")
     public UserDTO getUser(@PathVariable Long id) {
         return userMapper.toDTO(userService.findUserById(id));
     }
