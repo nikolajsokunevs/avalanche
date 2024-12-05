@@ -10,8 +10,8 @@ services:
       - TG_SECRET
       - SPRING_PROFILES_ACTIVE=do
     ports:
-      - "8443:8443"
-    volumes:
-      - /etc/letsencrypt/live/gameavalanche.duckdns.org:/etc/letsencrypt/live/gameavalanche.duckdns.org
-      - /etc/letsencrypt/archive/gameavalanche.duckdns.org:/etc/letsencrypt/archive/gameavalanche.duckdns.org
-      - /etc/letsencrypt/renewal/gameavalanche.duckdns.org.conf:/etc/letsencrypt/renewal/gameavalanche.duckdns.org.conf
+      - "8080:8080"
+#    volumes:
+#      - /etc/letsencrypt/live/gameavalanche.duckdns.org:/etc/letsencrypt/live/gameavalanche.duckdns.org
+#      - /etc/letsencrypt/archive/gameavalanche.duckdns.org:/etc/letsencrypt/archive/gameavalanche.duckdns.org
+#      - /etc/letsencrypt/renewal/gameavalanche.duckdns.org.conf:/etc/letsencrypt/renewal/gameavalanche.duckdns.org.conf
