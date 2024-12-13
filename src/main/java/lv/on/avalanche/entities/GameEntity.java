@@ -32,10 +32,16 @@ public class GameEntity {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (bank == null) {
+            bank = 0.0;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        if (bank == null) {
+            bank = 0.0;
+        }
     }
 }

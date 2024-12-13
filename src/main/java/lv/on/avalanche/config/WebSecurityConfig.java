@@ -21,18 +21,28 @@ public class WebSecurityConfig {
     @Value("${telegram.secret}")
     private String telegramSecret;
 
-    private final HashVerificationFilter hashVerificationFilter;
-
-    public WebSecurityConfig(HashVerificationFilter hashVerificationFilter) {
-        this.hashVerificationFilter = hashVerificationFilter;
-    }
+//    private final HashVerificationFilter hashVerificationFilter;
+//
+//    public WebSecurityConfig(HashVerificationFilter hashVerificationFilter) {
+//        this.hashVerificationFilter = hashVerificationFilter;
+//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeHttpRequests(authorize -> authorize
+//                        .requestMatchers("/get/**")
+//                        .authenticated()
+//                        .anyRequest()
+//                        .permitAll()
+//                )
+//                .csrf(csrf -> csrf.disable());
+//
+//        return http.build();
+
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/get/**").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().permitAll() // Disable all authentication
                 )
                 .csrf(csrf -> csrf.disable());
 
