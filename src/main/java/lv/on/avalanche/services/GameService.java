@@ -3,6 +3,8 @@ package lv.on.avalanche.services;
 import lombok.extern.slf4j.Slf4j;
 import lv.on.avalanche.dto.BetRequest;
 import lv.on.avalanche.entities.BalanceEntity;
+import lv.on.avalanche.entities.BetEntity;
+import lv.on.avalanche.entities.GameEntity;
 import lv.on.avalanche.exceptions.GameException;
 import lv.on.avalanche.mapper.BetMapper;
 import lv.on.avalanche.mapper.GameMapper;
@@ -61,18 +63,21 @@ public class GameService {
                     .nextMoveUser(player1)
                     .threshold(threshold)
                     .inProgress(true)
+                    .bank(0.0)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now()).build();
+            GameEntity gameEntity=gameRepository.save(gameMapper.toEntity(game));
+            game.setId(gameEntity.getId());
             gameSessions.put(player1, game);
             gameSessions.put(player2, game);
             messageService.sendGameUpdate(game);
-            gameRepository.save(gameMapper.toEntity(game));
+
         }
     }
 
     public void placeBet(BetRequest request) {
         log.info("Place a bet!");
-        BalanceEntity balanceEntity = balanceRepository.findByUserId(request.getPlayer());
+        BalanceEntity balanceEntity = balanceRepository.findByUserChatId(request.getPlayer());
         log.info("Balance: " + balanceEntity.getBalance());
         if (balanceEntity == null) {
             throw new GameException(500, "There's no balance");
@@ -104,7 +109,9 @@ public class GameService {
         } else {
             game.setNextMoveUser(nextMovePlayer);
         }
-        betRepository.save(betMapper.toEntity(request));
+        BetEntity betEntity=betMapper.toEntity(request);
+        betEntity.setGameId(game.getId());
+        betRepository.save(betEntity);
         gameRepository.save(gameMapper.toEntity(game));
         balanceRepository.save(balanceEntity);
         messageService.sendGameUpdate(game);

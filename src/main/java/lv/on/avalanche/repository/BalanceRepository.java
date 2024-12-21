@@ -9,4 +9,7 @@ public interface BalanceRepository extends CrudRepository<BalanceEntity, Long> {
 
     @Query("SELECT b FROM BalanceEntity b WHERE b.userEntity.id = :userId")
     BalanceEntity findByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT b FROM BalanceEntity b WHERE b.userEntity.chatId = :chatId")
+    BalanceEntity findByUserChatId(@Param("chatId") Long chatId);
 }

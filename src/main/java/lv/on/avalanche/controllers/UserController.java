@@ -18,7 +18,7 @@ public class UserController {
     private UserMapper userMapper;
 
     @PostMapping("/create")
-    //@PreAuthorize("#request.id == authentication.principal.id")
+    @PreAuthorize("#request.id == authentication.principal.id")
     public UserDTO create(@RequestBody UserDTO request) {
         log.info("Create user: " + request);
         return userService.createUser(request);

@@ -1,7 +1,7 @@
 package lv.on.avalanche.config.enums;
 
 public enum WebSocketTopics {
-    GAME_STATUS("/game/status/");
+    GAME_STATUS("/topic/status/");
 
     private String topic;
 

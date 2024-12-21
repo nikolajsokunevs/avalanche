@@ -2,7 +2,6 @@ package lv.on.avalanche.services;
 
 import lv.on.avalanche.dto.BetResponse;
 import lv.on.avalanche.dto.GameResponse;
-import lv.on.avalanche.entities.BetEntity;
 import lv.on.avalanche.mapper.BetMapper;
 import lv.on.avalanche.models.Game;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,8 @@ public class MessageService {
     public void sendGameUpdate(Game game) {
         Long player1 = game.getPlayer1();
         Long player2 = game.getPlayer2();
-        messagingTemplate.convertAndSend(GAME_STATUS.get() + player1, prepareResponseForPlayer(game, player1));
-        messagingTemplate.convertAndSend(GAME_STATUS.get() + player2, prepareResponseForPlayer(game, player2));
+        messagingTemplate.convertAndSend(GAME_STATUS.get()+player1, prepareResponseForPlayer(game, player1));
+        messagingTemplate.convertAndSend(GAME_STATUS.get()+player2, prepareResponseForPlayer(game, player2));
     }
 
     private GameResponse prepareResponseForPlayer(Game game, Long player) {
@@ -45,9 +44,11 @@ public class MessageService {
         Double winAmount = win ? game.getBank() : null;
         List<BetResponse> betResponseList = win ? game.getBetList().stream().filter(e -> player.equals(e.getPlayer())).map(e -> betMapper.toBetResponse(e)).toList() : new ArrayList<>();
         return GameResponse.builder()
+                .gameId(game.getId())
                 .yourMove(yourMove)
                 .inProgress(gameInProgress)
                 .win(win)
+                .threshold(game.getThreshold())
                 .winAmount(winAmount)
                 .betResponseList(betResponseList)
                 .build();
