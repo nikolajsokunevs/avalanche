@@ -51,27 +51,31 @@ public class GameService {
             throw new GameException(500, "There's no such threshold");
         }
         if (playersQueue.get(threshold).contains(player1)) {
-            throw new GameException(500, "User already in a queue");
+            log.info("User:" + player1 + " already in a queue");
         }
-        Long player2 = playersQueue.get(threshold).poll();
-        if (player2 == null) {
-            playersQueue.get(threshold).add(player1);
+        Game gameAlreadyExists=gameSessions.get(player1);
+        if (gameAlreadyExists!=null) {
+            messageService.sendGameUpdate(gameAlreadyExists);
         } else {
-            Game game = Game.builder()
-                    .player1(player1)
-                    .player2(player2)
-                    .nextMoveUser(player1)
-                    .threshold(threshold)
-                    .inProgress(true)
-                    .bank(0.0)
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now()).build();
-            GameEntity gameEntity=gameRepository.save(gameMapper.toEntity(game));
-            game.setId(gameEntity.getId());
-            gameSessions.put(player1, game);
-            gameSessions.put(player2, game);
-            messageService.sendGameUpdate(game);
-
+            Long player2 = playersQueue.get(threshold).poll();
+            if (player2 == null) {
+                playersQueue.get(threshold).add(player1);
+            } else {
+                Game game = Game.builder()
+                        .player1(player1)
+                        .player2(player2)
+                        .nextMoveUser(player1)
+                        .threshold(threshold)
+                        .inProgress(true)
+                        .bank(0.0)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now()).build();
+                GameEntity gameEntity = gameRepository.save(gameMapper.toEntity(game));
+                game.setId(gameEntity.getId());
+                gameSessions.put(player1, game);
+                gameSessions.put(player2, game);
+                messageService.sendGameUpdate(game);
+            }
         }
     }
 
@@ -109,7 +113,7 @@ public class GameService {
         } else {
             game.setNextMoveUser(nextMovePlayer);
         }
-        BetEntity betEntity=betMapper.toEntity(request);
+        BetEntity betEntity = betMapper.toEntity(request);
         betEntity.setGameId(game.getId());
         betRepository.save(betEntity);
         gameRepository.save(gameMapper.toEntity(game));
