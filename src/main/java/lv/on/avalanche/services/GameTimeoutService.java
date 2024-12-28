@@ -57,13 +57,14 @@ public class GameTimeoutService {
                 Long winner = (Objects.equals(game.getNextMoveUser(), game.getPlayer1())) ? game.getPlayer2() : game.getPlayer1();
                 game.setWinner(winner);
                 game.setInProgress(false);
-                gameService.getGameSessions().put(entry.getKey(), game);
+                gameService.getGameSessions().remove(entry.getKey());
                 gameRepository.save(gameMapper.toEntity(game));
                 messageService.sendGameUpdate(game);
                 iterator.remove();
             } else if (game.getUpdatedAt() != null &&
                     between(game.getUpdatedAt(), now).toMillis() / 1000 > moveTimeoutSeconds &&
                     !game.getInProgress()) {
+                gameService.getGameSessions().remove(entry.getKey());
                 iterator.remove();
             }
         }

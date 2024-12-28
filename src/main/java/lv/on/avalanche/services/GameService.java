@@ -54,7 +54,7 @@ public class GameService {
             log.info("User:" + player1 + " already in a queue");
         } else {
             Game gameAlreadyExists = gameSessions.get(player1);
-            if (gameAlreadyExists != null) {
+            if (gameAlreadyExists != null && gameAlreadyExists.getInProgress()) {
                 messageService.sendGameUpdate(gameAlreadyExists);
             } else {
                 Long player2 = playersQueue.get(threshold).poll();
@@ -106,6 +106,7 @@ public class GameService {
         balanceEntity.setBalance(balanceEntity.getBalance() - request.getAmount());
         game.setBank(game.getBank() + request.getAmount());
         game.getBetList().add(betMapper.toBet(request));
+        game.setUpdatedAt(LocalDateTime.now());
         Long nextMovePlayer = request.getPlayer().equals(game.getPlayer1()) ? game.getPlayer2() : game.getPlayer1();
         if (game.getBank() >= game.getThreshold()) {
             game.setInProgress(false);
