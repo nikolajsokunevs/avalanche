@@ -1,5 +1,6 @@
 package lv.on.avalanche.mapper;
 
+import lv.on.avalanche.dto.GameHistoryResponseDTO;
 import lv.on.avalanche.entities.GameEntity;
 import lv.on.avalanche.models.Game;
 import org.springframework.stereotype.Component;
@@ -20,5 +21,13 @@ public class GameMapper {
         gameEntity.setCreatedAt(game.getCreatedAt());
         gameEntity.setUpdatedAt(game.getUpdatedAt());
         return gameEntity;
+    }
+
+    public GameHistoryResponseDTO toGameHistoryResponseDTO(GameEntity game, Long userId) {
+        GameHistoryResponseDTO responseDTO=new GameHistoryResponseDTO(game.getUpdatedAt(),
+                game.getThreshold(),
+                game.getBank(),
+                userId.equals(game.getWinner()));
+        return responseDTO;
     }
 }

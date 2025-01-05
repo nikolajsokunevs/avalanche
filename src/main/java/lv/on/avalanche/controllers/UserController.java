@@ -1,12 +1,16 @@
 package lv.on.avalanche.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import lv.on.avalanche.dto.GameHistoryResponseDTO;
 import lv.on.avalanche.dto.UserDTO;
 import lv.on.avalanche.mapper.UserMapper;
 import lv.on.avalanche.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -29,4 +33,11 @@ public class UserController {
     public UserDTO getUser(@PathVariable Long id) {
         return userMapper.toDTO(userService.findUserById(id));
     }
+
+    @GetMapping("/get/history")
+    @PreAuthorize("#id == authentication.principal.id")
+    public List<GameHistoryResponseDTO> getGames(@RequestParam Long id) {
+        return userService.getHistory(id);
+    }
+
 }
